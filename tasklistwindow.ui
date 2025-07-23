@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>taskListWindow</class>
+ <widget class="QMainWindow" name="taskListWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>800</width>
+    <height>600</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>taskListWindow</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <widget class="QWidget" name="verticalLayoutWidget">
+    <property name="geometry">
+     <rect>
+      <x>30</x>
+      <y>20</y>
+      <width>741</width>
+      <height>421</height>
+     </rect>
+    </property>
+    <layout class="QVBoxLayout" name="verticalLayout">
+     <item>
+      <widget class="QListWidget" name="taskListWidget">
+       <property name="font">
+        <font>
+         <pointsize>14</pointsize>
+        </font>
+       </property>
+       <property name="mouseTracking">
+        <bool>false</bool>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </widget>
+   <widget class="QFrame" name="frame">
+    <property name="geometry">
+     <rect>
+      <x>30</x>
+      <y>440</y>
+      <width>741</width>
+      <height>151</height>
+     </rect>
+    </property>
+    <property name="frameShape">
+     <enum>QFrame::Shape::StyledPanel</enum>
+    </property>
+    <property name="frameShadow">
+     <enum>QFrame::Shadow::Raised</enum>
+    </property>
+    <widget class="QLineEdit" name="taskInput">
+     <property name="geometry">
+      <rect>
+       <x>280</x>
+       <y>50</y>
+       <width>171</width>
+       <height>41</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <pointsize>10</pointsize>
+      </font>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+     <property name="cursorPosition">
+      <number>0</number>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignmentFlag::AlignHCenter|Qt::AlignmentFlag::AlignTop</set>
+     </property>
+     <property name="placeholderText">
+      <string>Enter task here</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="addTaskButton">
+     <property name="geometry">
+      <rect>
+       <x>580</x>
+       <y>20</y>
+       <width>121</width>
+       <height>41</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Input Task</string>
+     </property>
+    </widget>
+    <widget class="QTimeEdit" name="taskTimeEdit">
+     <property name="geometry">
+      <rect>
+       <x>280</x>
+       <y>100</y>
+       <width>111</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="layoutDirection">
+      <enum>Qt::LayoutDirection::LeftToRight</enum>
+     </property>
+     <property name="autoFillBackground">
+      <bool>false</bool>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignmentFlag::AlignCenter</set>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label1">
+     <property name="geometry">
+      <rect>
+       <x>280</x>
+       <y>10</y>
+       <width>171</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <pointsize>12</pointsize>
+       <bold>true</bold>
+      </font>
+     </property>
+     <property name="frameShape">
+      <enum>QFrame::Shape::Panel</enum>
+     </property>
+     <property name="text">
+      <string>Enter task and time</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="completeTaskButton">
+     <property name="geometry">
+      <rect>
+       <x>580</x>
+       <y>80</y>
+       <width>121</width>
+       <height>41</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Complete Task</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label2">
+     <property name="geometry">
+      <rect>
+       <x>40</x>
+       <y>10</y>
+       <width>161</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <pointsize>12</pointsize>
+       <bold>true</bold>
+      </font>
+     </property>
+     <property name="frameShape">
+      <enum>QFrame::Shape::Panel</enum>
+     </property>
+     <property name="text">
+      <string>Navigation</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignmentFlag::AlignCenter</set>
+     </property>
+    </widget>
+   </widget>
+  </widget>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
