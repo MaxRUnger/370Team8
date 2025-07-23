@@ -42,6 +42,9 @@
     <property name="text">
      <string>Journal</string>
     </property>
+    <property name="checkable">
+     <bool>false</bool>
+    </property>
    </widget>
    <widget class="QPushButton" name="taskBtn">
     <property name="geometry">
