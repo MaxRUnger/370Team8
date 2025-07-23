@@ -1,11 +1,11 @@
-#include "journalwindow.h"
+#include "moodtracker.h"
 
 #include <QApplication>
 
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
-    JournalWindow w;
+    MoodTracker w;
     w.show();
     return a.exec();
 }
