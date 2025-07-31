@@ -14,13 +14,21 @@ MoodTracker::MoodTracker(QWidget *parent)
     // Set slider ranges from 1 to 6
     ui->MoodSlider->setRange(1, 6);
     ui->EnergySlider->setRange(1, 6);
-    ui->AnxietySlider->setRange(1, 6); // Renamed from EmotionSlider
+    ui->AnxietySlider->setRange(1, 6);
+
+    // Enable rich text and clickable links in recommendation labels
+    ui->MoodRecommendationLabel->setTextFormat(Qt::RichText);
+    ui->AnxietyRecommendationLabel->setTextFormat(Qt::RichText);
+    ui->EnergyRecommendationLabel->setTextFormat(Qt::RichText);
+
+    ui->MoodRecommendationLabel->setOpenExternalLinks(true);
+    ui->AnxietyRecommendationLabel->setOpenExternalLinks(true);
+    ui->EnergyRecommendationLabel->setOpenExternalLinks(true);
 
     connect(ui->SubmitButton, &QPushButton::clicked,this, &MoodTracker::handleSubmit);
     connect(ui->LoginButton, &QPushButton::clicked, this, &MoodTracker::handleLoginClicked);
     connect(ui->JournalButton, &QPushButton::clicked, this, &MoodTracker::handleJournalClicked);
     connect(ui->TasksButton, &QPushButton::clicked, this, &MoodTracker::handleTasksClicked);
-
 }
 
 MoodTracker::~MoodTracker()
@@ -36,47 +44,25 @@ void MoodTracker::handleSubmit()
 
     qDebug() << "Mood:" << mood << "Energy:" << energy << "Anxiety:" << anxiety;
 
-    // Save current values as previous answers
     previousMood = mood;
     previousEnergy = energy;
     previousAnxiety = anxiety;
 
-    // Update previous answer labels
-    ui->PreviousMoodLabel->setText("Previous Mood: " + QString::number(previousMood));
-    ui->PreviousEnergyLabel->setText("Previous Energy: " + QString::number(previousEnergy));
-    ui->PreviousAnxietyLabel->setText("Previous Anxiety: " + QString::number(previousAnxiety));
-
-
-
+    ui->PreviousMoodLabel->setText("Previous mood: " + QString::number(previousMood));
+    ui->PreviousEnergyLabel->setText("Previous energy: " + QString::number(previousEnergy));
+    ui->PreviousAnxietyLabel->setText("Previous anxiety: " + QString::number(previousAnxiety));
 
     Recommendation moodRec = getMoodRecommendation(mood);
     Recommendation anxietyRec = getAnxietyRecommendation(anxiety);
     Recommendation energyRec = getEnergyRecommendation(energy);
 
-    QString output;
-    output += "Mood Recommendations:\n";
-    output += "  Short Task: " + moodRec.shortTask + "\n";
-    output += "  Long Task: " + moodRec.longTask + "\n\n";
-
-    output += "Anxiety Recommendations:\n";
-    output += "  Short Task: " + anxietyRec.shortTask + "\n";
-    output += "  Long Task: " + anxietyRec.longTask + "\n\n";
-
-    output += "Energy Recommendations:\n";
-    output += "  Short Task: " + energyRec.shortTask + "\n";
-    output += "  Long Task: " + energyRec.longTask;
-
-    qDebug().noquote() << output;
-
-    // Set text in UI labels
     ui->MoodRecommendationLabel->setText(
-        "Short Task: " + moodRec.shortTask + "\nLong Task: " + moodRec.longTask);
+        "Short task: " + moodRec.shortTask + "<br>Long task: " + moodRec.longTask);
     ui->AnxietyRecommendationLabel->setText(
-        "Short Task: " + anxietyRec.shortTask + "\nLong Task: " + anxietyRec.longTask);
+        "Short task: " + anxietyRec.shortTask + "<br>Long task: " + anxietyRec.longTask);
     ui->EnergyRecommendationLabel->setText(
-        "Short Task: " + energyRec.shortTask + "\nLong Task: " + energyRec.longTask);
+        "Short task: " + energyRec.shortTask + "<br>Long task: " + energyRec.longTask);
 }
-
 
 void MoodTracker::handleLoginClicked()
 {
@@ -93,7 +79,6 @@ void MoodTracker::handleTasksClicked()
     emit goToTasksPage();
 }
 
-
 Recommendation MoodTracker::getMoodRecommendation(int mood) {
     switch (mood) {
     case 1: return {"Journal for 10 minutes", "Call a support line or talk with a friend for 45 minutes"};
@@ -108,8 +93,14 @@ Recommendation MoodTracker::getMoodRecommendation(int mood) {
 
 Recommendation MoodTracker::getAnxietyRecommendation(int anxiety) {
     switch (anxiety) {
-    case 1: return {"Do breathwork for 5 minutes", "Go for a long walk or hike"};
-    case 2: return {"Color in an adult coloring book", "Do yoga or meditation for 45 minutes"};
+    case 1: return {
+            "Do breathwork for 10 minutes<br><a href='https://www.youtube.com/watch?v=9rP8VQVbwtE'>Watch: Balancing Breathwork</a>",
+            "Go for a long walk or hike"
+        };
+    case 2: return {
+            "Draw, do crafts, or practice an instrument",
+            "Do yoga or meditation<br><a href='https://www.youtube.com/watch?v=4pLUleLdwY4'>Watch: Deep Stretch Yoga</a>"
+        };
     case 3:
     case 4: return {"Make a to-do list", "Clean a room or reorganize a space"};
     case 5: return {"Take a warm shower", "Have a long talk with someone trusted"};
@@ -120,13 +111,24 @@ Recommendation MoodTracker::getAnxietyRecommendation(int anxiety) {
 
 Recommendation MoodTracker::getEnergyRecommendation(int energy) {
     switch (energy) {
-    case 1: return {"Have a cup of coffee and splash cold water on your face", "Listen to music and nap for an hour"};
-    case 2: return {"Stretch outside and get some fresh air", "Go on a walk and practice breathwork"};
-    case 3: return {"Make tea or coffee", "Read a book or study material for 45 minutes"};
-    case 4: return {"Do jumping jacks", "Clean your room or take a walk"};
-    case 5: return {"Do a full workout", "Run errands or complete a major chore"};
-    case 6: return {"Sprint for 5 mins or dance", "Take on a high-focus work session"};
+    case 1: return {
+            "Have a cup of coffee and splash cold water on your face",
+            "Listen to music and nap for an hour"
+        };
+    case 2: return {
+            "Stretch outside<br><a href='https://www.youtube.com/watch?v=qULTwquOuT4'>Watch: 8-Minute Stretch</a>",
+            "Walk and breathwork<br><a href='https://www.youtube.com/watch?v=9rP8VQVbwtE'>Watch: Breathwork</a>"
+        };
+    case 3: return {"Make tea or coffee", "Read a book or study for 45 minutes"};
+    case 4: return {
+            "Stretch / Plyometrics<br><a href='https://www.youtube.com/watch?v=Go2vqMYufKs'>Watch: Plyo Basics</a>",
+            "Clean your room or take a walk"
+        };
+    case 5: return {
+            "Do HIIT workout<br><a href='https://www.youtube.com/watch?v=cbKkB3POqaY'>Watch: 15-Min HIIT</a>",
+            "Run errands or complete a major chore"
+        };
+    case 6: return {"Run intervals: 2 mins fast / 1 min slow", "Do a high-focus study or work session"};
     default: return {"No energy task", "No energy task"};
     }
 }
-
