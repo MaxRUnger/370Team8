@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>806</width>
-    <height>606</height>
+    <width>870</width>
+    <height>734</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -16,8 +16,8 @@
   <widget class="QLabel" name="MoodLabel">
    <property name="geometry">
     <rect>
-     <x>190</x>
-     <y>280</y>
+     <x>210</x>
+     <y>350</y>
      <width>58</width>
      <height>16</height>
     </rect>
@@ -29,8 +29,8 @@
   <widget class="QSlider" name="MoodSlider">
    <property name="geometry">
     <rect>
-     <x>290</x>
-     <y>280</y>
+     <x>310</x>
+     <y>350</y>
      <width>160</width>
      <height>25</height>
     </rect>
@@ -54,8 +54,8 @@
   <widget class="QLabel" name="EnergyLabel">
    <property name="geometry">
     <rect>
-     <x>190</x>
-     <y>360</y>
+     <x>210</x>
+     <y>480</y>
      <width>58</width>
      <height>16</height>
     </rect>
@@ -67,8 +67,8 @@
   <widget class="QSlider" name="EnergySlider">
    <property name="geometry">
     <rect>
-     <x>290</x>
-     <y>360</y>
+     <x>310</x>
+     <y>480</y>
      <width>160</width>
      <height>25</height>
     </rect>
@@ -92,8 +92,8 @@
   <widget class="QLabel" name="AnxietyLabel">
    <property name="geometry">
     <rect>
-     <x>190</x>
-     <y>430</y>
+     <x>210</x>
+     <y>420</y>
      <width>58</width>
      <height>16</height>
     </rect>
@@ -105,8 +105,8 @@
   <widget class="QSlider" name="AnxietySlider">
    <property name="geometry">
     <rect>
-     <x>290</x>
-     <y>430</y>
+     <x>310</x>
+     <y>420</y>
      <width>160</width>
      <height>25</height>
     </rect>
@@ -130,8 +130,8 @@
   <widget class="QPushButton" name="SubmitButton">
    <property name="geometry">
     <rect>
-     <x>620</x>
-     <y>470</y>
+     <x>630</x>
+     <y>570</y>
      <width>100</width>
      <height>32</height>
     </rect>
@@ -143,8 +143,8 @@
   <widget class="QPushButton" name="LoginButton">
    <property name="geometry">
     <rect>
-     <x>60</x>
-     <y>570</y>
+     <x>70</x>
+     <y>670</y>
      <width>100</width>
      <height>32</height>
     </rect>
@@ -156,8 +156,8 @@
   <widget class="QPushButton" name="JournalButton">
    <property name="geometry">
     <rect>
-     <x>60</x>
-     <y>470</y>
+     <x>70</x>
+     <y>570</y>
      <width>100</width>
      <height>32</height>
     </rect>
@@ -169,8 +169,8 @@
   <widget class="QPushButton" name="TasksButton">
    <property name="geometry">
     <rect>
-     <x>60</x>
-     <y>520</y>
+     <x>70</x>
+     <y>620</y>
      <width>100</width>
      <height>32</height>
     </rect>
@@ -182,8 +182,8 @@
   <widget class="QWidget" name="horizontalLayoutWidget">
    <property name="geometry">
     <rect>
-     <x>290</x>
-     <y>300</y>
+     <x>310</x>
+     <y>370</y>
      <width>291</width>
      <height>18</height>
     </rect>
@@ -208,8 +208,8 @@
   <widget class="QWidget" name="horizontalLayoutWidget_2">
    <property name="geometry">
     <rect>
-     <x>290</x>
-     <y>380</y>
+     <x>310</x>
+     <y>500</y>
      <width>291</width>
      <height>18</height>
     </rect>
@@ -234,8 +234,8 @@
   <widget class="QWidget" name="horizontalLayoutWidget_3">
    <property name="geometry">
     <rect>
-     <x>290</x>
-     <y>450</y>
+     <x>310</x>
+     <y>440</y>
      <width>291</width>
      <height>18</height>
     </rect>
@@ -261,7 +261,7 @@
    <property name="geometry">
     <rect>
      <x>0</x>
-     <y>0</y>
+     <y>40</y>
      <width>551</width>
      <height>91</height>
     </rect>
@@ -274,8 +274,8 @@
    <property name="geometry">
     <rect>
      <x>0</x>
-     <y>160</y>
-     <width>561</width>
+     <y>130</y>
+     <width>551</width>
      <height>81</height>
     </rect>
    </property>
@@ -287,8 +287,8 @@
    <property name="geometry">
     <rect>
      <x>0</x>
-     <y>90</y>
-     <width>571</width>
+     <y>200</y>
+     <width>551</width>
      <height>91</height>
     </rect>
    </property>
@@ -300,7 +300,7 @@
    <property name="geometry">
     <rect>
      <x>560</x>
-     <y>30</y>
+     <y>80</y>
      <width>201</width>
      <height>16</height>
     </rect>
@@ -313,7 +313,7 @@
    <property name="geometry">
     <rect>
      <x>560</x>
-     <y>190</y>
+     <y>240</y>
      <width>211</width>
      <height>16</height>
     </rect>
@@ -326,7 +326,7 @@
    <property name="geometry">
     <rect>
      <x>560</x>
-     <y>120</y>
+     <y>160</y>
      <width>211</width>
      <height>16</height>
     </rect>
