@@ -13,53 +13,124 @@
   <property name="windowTitle">
    <string>Journal</string>
   </property>
+
   <widget class="QWidget" name="centralwidget">
-   <layout class="QGridLayout" name="gridLayout" columnstretch="1,1">
-    <item row="0" column="0" rowspan="2">
-     <widget class="QTextEdit" name="contentView">
-      <property name="placeholderText">
-       <string>Select a journal entry to view...</string>
-      </property>
-     </widget>
+   <!-- 🔽 MAIN LAYOUT -->
+   <layout class="QVBoxLayout" name="mainVerticalLayout" stretch="5,1">
+
+    <!-- 🔝 TOP: Journal Entry + List -->
+    <item>
+     <layout class="QHBoxLayout" name="topHorizontalLayout">
+      
+      <!-- Journal Entry (left) -->
+      <item>
+       <widget class="QTextEdit" name="contentView">
+        <property name="placeholderText">
+         <string>Write or view journal entry here...</string>
+        </property>
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Expanding"/>
+        </property>
+       </widget>
+      </item>
+
+      <!-- Journal List (right) -->
+      <item>
+       <widget class="QListWidget" name="entryListWidget">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Expanding"/>
+        </property>
+       </widget>
+      </item>
+
+     </layout>
     </item>
-    <item row="0" column="1">
-     <widget class="QListWidget" name="entryListWidget"/>
-    </item>
-    <item row="1" column="1">
-     <layout class="QHBoxLayout" name="buttonRow">
+
+    <!-- 🔻 BOTTOM: Buttons -->
+    <item>
+     <layout class="QHBoxLayout" name="bottomHorizontalLayout">
+      
+      <!-- Left Column: Task / Mood / Logout -->
       <item>
-       <widget class="QPushButton" name="navButton">
-        <property name="text">
-         <string>Navigation</string>
-        </property>
-       </widget>
+       <layout class="QVBoxLayout" name="leftButtonColumn">
+        <item alignment="Qt::AlignLeft">
+         <widget class="QPushButton" name="taskButton">
+          <property name="text">
+           <string>Task</string>
+          </property>
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Fixed" vsizetype="Fixed"/>
+          </property>
+        </widget>
+        </item>
+        <item alignment="Qt::AlignLeft">
+         <widget class="QPushButton" name="moodButton">
+          <property name="text">
+           <string>Mood</string>
+          </property>
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Fixed" vsizetype="Fixed"/>
+          </property>
+        </widget>
+        </item>
+        <item alignment="Qt::AlignLeft">
+         <widget class="QPushButton" name="logoutButton">
+          <property name="text">
+           <string>Logout</string>
+          </property>
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Fixed" vsizetype="Fixed"/>
+          </property>
+        </widget>
+        </item>
+       </layout>
       </item>
+
+      <!-- Spacer in middle to push buttons apart -->
       <item>
-       <widget class="QPushButton" name="addButton">
-        <property name="text">
-         <string>Add</string>
+       <spacer name="middleSpacer">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
         </property>
-       </widget>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
       </item>
+
+      <!-- Right Column: Add / Delete -->
       <item>
-       <widget class="QPushButton" name="deleteButton">
-        <property name="text">
-         <string>Delete</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="placeholderButton">
-        <property name="text">
-         <string/>
-        </property>
-       </widget>
+       <layout class="QVBoxLayout" name="rightButtonColumn">
+        <item alignment="Qt::AlignRight">
+         <widget class="QPushButton" name="addButton">
+          <property name="text">
+           <string>Add</string>
+          </property>
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Fixed" vsizetype="Fixed"/>
+          </property>
+        </widget>
+        </item>
+        <item alignment="Qt::AlignRight">
+         <widget class="QPushButton" name="deleteButton">
+          <property name="text">
+           <string>Delete</string>
+          </property>
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Fixed" vsizetype="Fixed"/>
+          </property>
+        </widget>
+        </item>
+       </layout>
       </item>
      </layout>
     </item>
    </layout>
   </widget>
  </widget>
- <resources/>
- <connections/>
+  <resources/>
+  <connections/>
 </ui>

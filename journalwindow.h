@@ -15,11 +15,18 @@ class JournalWindow : public QMainWindow
 public:
     explicit JournalWindow(QWidget *parent = nullptr);
     ~JournalWindow();
+signals:
+    void goToMoodTracker();
+    void goToLoginPage();
+    void goToTasksPage();
 
 private slots:
     void onEntrySelected();
     void onAddClicked();
     void onDeleteClicked();
+    void handleLoginClicked();
+    void handleMoodTrackerClicked();
+    void handleTasksClicked();
 
 private:
     Ui::JournalWindow *ui;
