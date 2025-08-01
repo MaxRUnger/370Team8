@@ -19,6 +19,13 @@ JournalWindow::JournalWindow(QWidget *parent)
         }
     });
 
+
+    connect(ui->logoutButton, &QPushButton::clicked, this, &JournalWindow::handleMoodTrackerClicked);
+    connect(ui->taskButton, &QPushButton::clicked, this, &JournalWindow::handleTasksClicked);
+    connect(ui->moodButton, &QPushButton::clicked, this, &JournalWindow::handleMoodTrackerClicked);
+
+
+
     refreshEntryList();
 }
 
@@ -63,4 +70,20 @@ void JournalWindow::refreshEntryList() {
     for (const JournalEntry &entry : journal.getEntries()) {
         ui->entryListWidget->addItem(entry.title + " (" + entry.date.toString("yyyy-MM-dd") + ")");
     }
+}
+
+
+void JournalWindow::handleLoginClicked()
+{
+    emit goToLoginPage();
+}
+
+void JournalWindow::handleMoodTrackerClicked()
+{
+    emit goToMoodTracker();
+}
+
+void JournalWindow::handleTasksClicked()
+{
+    emit goToTasksPage();
 }
