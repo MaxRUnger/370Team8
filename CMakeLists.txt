@@ -46,6 +46,8 @@ qt_add_executable(Lyfestyle
     ${UIS}
 )
 
+set_target_properties(Lyfestyle PROPERTIES WIN32_EXECUTABLE TRUE)
+
 target_link_libraries(Lyfestyle
     PRIVATE
         Qt6::Widgets
