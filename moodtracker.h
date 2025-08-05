@@ -2,8 +2,7 @@
 #define MOODTRACKER_H
 
 #include <QWidget>
-#include <QString> // This is needed for QString.
-
+#include <QString>
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -21,13 +20,8 @@ class MoodTracker : public QWidget
     Q_OBJECT
 
 public:
-    MoodTracker(QWidget *parent = nullptr);
+    explicit MoodTracker(QWidget *parent = nullptr);
     ~MoodTracker();
-
-signals:
-    void goToLoginPage();
-    void goToJournalPage();
-    void goToTasksPage();
 
 private slots:
     void handleSubmit();
@@ -35,19 +29,16 @@ private slots:
     void handleJournalClicked();
     void handleTasksClicked();
 
-
 private:
     Ui::MoodTracker *ui;
-    // Adding my function declarations for the recommendation logic
 
     int previousMood = 0;
     int previousEnergy = 0;
     int previousAnxiety = 0;
 
-
     Recommendation getMoodRecommendation(int mood);
     Recommendation getAnxietyRecommendation(int anxiety);
     Recommendation getEnergyRecommendation(int energy);
-
 };
+
 #endif // MOODTRACKER_H

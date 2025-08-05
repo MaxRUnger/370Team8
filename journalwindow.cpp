@@ -1,6 +1,10 @@
 #include "journalwindow.h"
 #include "ui_journalwindow.h"
-#include <QInputDialog>
+#include "tasklistwindow.h"
+#include "moodtracker.h"
+#include <QSqlQuery>
+#include <QSqlError>
+#include <QDateTime>
 #include <QMessageBox>
 
 JournalWindow::JournalWindow(QWidget *parent)
@@ -8,82 +12,156 @@ JournalWindow::JournalWindow(QWidget *parent)
     , ui(new Ui::JournalWindow)
 {
     ui->setupUi(this);
-    journal.init();
+    this->resize(810, 660);
 
-    connect(ui->entryListWidget, &QListWidget::currentRowChanged, this, &JournalWindow::onEntrySelected);
-    connect(ui->addButton, &QPushButton::clicked, this, &JournalWindow::onAddClicked);
-    connect(ui->deleteButton, &QPushButton::clicked, this, &JournalWindow::onDeleteClicked);
-    connect(ui->contentView, &QTextEdit::textChanged, this, [=]() {
-        if (selectedId >= 0) {
-            journal.updateEntryContent(selectedId, ui->contentView->toPlainText());
-        }
-    });
+    connectDatabase();
+    loadEntries();
 
+    // Entry-related buttons
+    connect(ui->addEntryButton, &QPushButton::clicked, this, &JournalWindow::onAddEntryClicked);
+    connect(ui->deleteEntryButton, &QPushButton::clicked, this, &JournalWindow::onDeleteEntryClicked);
+    connect(ui->dateTimeEdit, &QDateTimeEdit::editingFinished, this, &JournalWindow::onDatetimeClicked);
+    connect(ui->entryListWidget, &QListWidget::itemClicked, this, &JournalWindow::onEntrySelected);
 
-    connect(ui->logoutButton, &QPushButton::clicked, this, &JournalWindow::handleMoodTrackerClicked);
-    connect(ui->taskButton, &QPushButton::clicked, this, &JournalWindow::handleTasksClicked);
-    connect(ui->moodButton, &QPushButton::clicked, this, &JournalWindow::handleMoodTrackerClicked);
-
-
-
-    refreshEntryList();
+    // Navigation buttons
+    connect(ui->tasklistButton, &QPushButton::clicked, this, &JournalWindow::onTaskListButtonClicked);
+    connect(ui->moodPageButton, &QPushButton::clicked, this, &JournalWindow::onMoodPageButtonClicked);
+    connect(ui->logoutButton, &QPushButton::clicked, this, &JournalWindow::onLogoutButtonClicked);
 }
 
-JournalWindow::~JournalWindow() {
+JournalWindow::~JournalWindow()
+{
+    db.close();
     delete ui;
 }
 
-void JournalWindow::onEntrySelected() {
-    int index = ui->entryListWidget->currentRow();
-    if (index >= 0 && index < journal.getEntries().size()) {
-        const JournalEntry &entry = journal.getEntries()[index];
-        selectedId = entry.id;
-        ui->contentView->blockSignals(true);
-        ui->contentView->setPlainText(entry.content);
-        ui->contentView->blockSignals(false);
-    } else {
-        selectedId = -1;
-        ui->contentView->clear();
+void JournalWindow::connectDatabase()
+{
+    db = QSqlDatabase::addDatabase("QSQLITE");
+    db.setDatabaseName("journal.db");
+
+    if (!db.open()) {
+        QMessageBox::critical(this, "Database Error", db.lastError().text());
+        return;
     }
+
+    QSqlQuery query;
+    query.exec("CREATE TABLE IF NOT EXISTS entries ("
+               "id INTEGER PRIMARY KEY AUTOINCREMENT, "
+               "name TEXT, "
+               "timestamp TEXT, "
+               "content TEXT)");
 }
 
-void JournalWindow::onAddClicked() {
-    QString title = QInputDialog::getText(this, "New Entry", "Enter title:");
-    if (!title.isEmpty()) {
-        journal.addEntry(title);
-        refreshEntryList();
-    }
-}
-
-void JournalWindow::onDeleteClicked() {
-    int index = ui->entryListWidget->currentRow();
-    if (index >= 0 && index < journal.getEntries().size()) {
-        journal.deleteEntry(journal.getEntries()[index].id);
-        refreshEntryList();
-        ui->contentView->clear();
-        selectedId = -1;
-    }
-}
-
-void JournalWindow::refreshEntryList() {
+void JournalWindow::loadEntries()
+{
     ui->entryListWidget->clear();
-    for (const JournalEntry &entry : journal.getEntries()) {
-        ui->entryListWidget->addItem(entry.title + " (" + entry.date.toString("yyyy-MM-dd") + ")");
+
+    QSqlQuery query("SELECT id, name, timestamp FROM entries ORDER BY id DESC", db);
+    while (query.next()) {
+        QString name = query.value(1).toString();
+        QString isoTimestamp = query.value(2).toString();
+
+        QDateTime datetime = QDateTime::fromString(isoTimestamp, Qt::ISODate);
+        QString formattedTime = datetime.toString("yyyy-MM-dd hh:mm AP");
+
+        QString itemText = name + " [" + formattedTime + "]";
+        ui->entryListWidget->addItem(itemText);
     }
 }
 
-
-void JournalWindow::handleLoginClicked()
+void JournalWindow::onAddEntryClicked()
 {
-    emit goToLoginPage();
+    QString name = ui->nameEntryEdit->text().trimmed();
+    QString timestamp = ui->dateTimeEdit->dateTime().toString(Qt::ISODate);
+    QString content = ui->journalTextEdit->toPlainText().trimmed();
+
+    if (name.isEmpty() || content.isEmpty()) {
+        QMessageBox::warning(this, "Missing Info", "Please enter both a name and journal content.");
+        return;
+    }
+
+    QSqlQuery query;
+    query.prepare("INSERT INTO entries (name, timestamp, content) VALUES (?, ?, ?)");
+    query.addBindValue(name);
+    query.addBindValue(timestamp);
+    query.addBindValue(content);
+
+    if (!query.exec()) {
+        QMessageBox::critical(this, "Insert Failed", query.lastError().text());
+        return;
+    }
+
+    ui->nameEntryEdit->clear();
+    ui->journalTextEdit->clear();
+
+    loadEntries();
 }
 
-void JournalWindow::handleMoodTrackerClicked()
+void JournalWindow::onDeleteEntryClicked()
 {
-    emit goToMoodTracker();
+    QListWidgetItem *item = ui->entryListWidget->currentItem();
+    if (!item) return;
+
+    QString label = item->text();
+    QString name = label.section(" [", 0, 0).trimmed();
+    QString timestamp = label.section(" [", 1).chopped(1).trimmed();
+
+    QSqlQuery query;
+    query.prepare("DELETE FROM entries WHERE name = ? AND timestamp = ?");
+    query.addBindValue(name);
+    query.addBindValue(timestamp);
+
+    if (!query.exec()) {
+        QMessageBox::critical(this, "Error", "Failed to delete entry from database:\n" + query.lastError().text());
+        return;
+    }
+
+    delete item;
+    ui->journalTextEdit->clear();
+    ui->nameEntryEdit->clear();
+    ui->dateTimeEdit->setDateTime(QDateTime::currentDateTime());
 }
 
-void JournalWindow::handleTasksClicked()
+void JournalWindow::onEntrySelected()
 {
-    emit goToTasksPage();
+    QListWidgetItem *item = ui->entryListWidget->currentItem();
+    if (!item) return;
+
+    QString label = item->text();
+    QString name = label.section(" [", 0, 0);
+
+    QSqlQuery query;
+    query.prepare("SELECT content FROM entries WHERE name = ?");
+    query.addBindValue(name);
+
+    if (query.exec() && query.next()) {
+        QString content = query.value(0).toString();
+        ui->journalTextEdit->setPlainText(content);
+    }
+}
+
+void JournalWindow::onDatetimeClicked()
+{
+    ui->dateTimeEdit->setDateTime(QDateTime::currentDateTime());
+}
+
+// ✅ Mood Page Button — IMPLEMENTED
+void JournalWindow::onMoodPageButtonClicked()
+{
+    auto *moodWin = new MoodTracker();
+    moodWin->show();
+    this->close();
+}
+
+void JournalWindow::onTaskListButtonClicked()
+{
+    auto *taskWin = new taskListWindow();
+    taskWin->show();
+    this->close();
+}
+
+void JournalWindow::onLogoutButtonClicked()
+{
+    QApplication::quit();
 }

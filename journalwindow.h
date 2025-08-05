@@ -2,7 +2,7 @@
 #define JOURNALWINDOW_H
 
 #include <QMainWindow>
-#include "journal.h"
+#include <QSqlDatabase>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class JournalWindow; }
@@ -15,24 +15,24 @@ class JournalWindow : public QMainWindow
 public:
     explicit JournalWindow(QWidget *parent = nullptr);
     ~JournalWindow();
-signals:
-    void goToMoodTracker();
-    void goToLoginPage();
-    void goToTasksPage();
 
 private slots:
+    void onAddEntryClicked();
+    void onDeleteEntryClicked();
     void onEntrySelected();
-    void onAddClicked();
-    void onDeleteClicked();
-    void handleLoginClicked();
-    void handleMoodTrackerClicked();
-    void handleTasksClicked();
+    void onDatetimeClicked();
+
+    // Navigation buttons
+    void onTaskListButtonClicked();
+    void onMoodPageButtonClicked();
+    void onLogoutButtonClicked();
 
 private:
     Ui::JournalWindow *ui;
-    Journal journal;
+    QSqlDatabase db;
 
-    int selectedId = -1;
-    void refreshEntryList();
+    void connectDatabase();
+    void loadEntries();
 };
+
 #endif // JOURNALWINDOW_H
