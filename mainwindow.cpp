@@ -20,14 +20,6 @@ MainWindow::MainWindow(QWidget *parent)
     stack->addWidget(journalWindow);  // index 1
 
     stack->setCurrentWidget(moodTracker);
-
-    connect(moodTracker, &MoodTracker::goToJournalPage, this, [=]() {
-        stack->setCurrentWidget(journalWindow);
-    });
-
-    connect(journalWindow, &JournalWindow::goToMoodTracker, this, [=]() {
-        stack->setCurrentWidget(moodTracker);
-    });
 }
 
 MainWindow::~MainWindow() {
