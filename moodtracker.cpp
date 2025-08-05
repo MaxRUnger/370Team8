@@ -1,3 +1,7 @@
+#include "journalwindow.h"
+#include "tasklistwindow.h"
+#include <QApplication>
+
 #include "moodtracker.h"
 #include "ui_moodtracker.h"
 #include <QDebug>
@@ -10,6 +14,7 @@ MoodTracker::MoodTracker(QWidget *parent)
     , ui(new Ui::MoodTracker)
 {
     ui->setupUi(this);
+    this->resize(810, 660);
 
     // Set slider ranges from 1 to 6
     ui->MoodSlider->setRange(1, 6);
@@ -25,7 +30,7 @@ MoodTracker::MoodTracker(QWidget *parent)
     ui->AnxietyRecommendationLabel->setOpenExternalLinks(true);
     ui->EnergyRecommendationLabel->setOpenExternalLinks(true);
 
-    connect(ui->SubmitButton, &QPushButton::clicked,this, &MoodTracker::handleSubmit);
+    connect(ui->SubmitButton, &QPushButton::clicked, this, &MoodTracker::handleSubmit);
     connect(ui->LoginButton, &QPushButton::clicked, this, &MoodTracker::handleLoginClicked);
     connect(ui->JournalButton, &QPushButton::clicked, this, &MoodTracker::handleJournalClicked);
     connect(ui->TasksButton, &QPushButton::clicked, this, &MoodTracker::handleTasksClicked);
@@ -64,19 +69,24 @@ void MoodTracker::handleSubmit()
         "Short task: " + energyRec.shortTask + "<br>Long task: " + energyRec.longTask);
 }
 
+// NAVIGATION
 void MoodTracker::handleLoginClicked()
 {
-    emit goToLoginPage();
+    QApplication::quit();
 }
 
 void MoodTracker::handleJournalClicked()
 {
-    emit goToJournalPage();
+    auto *journalWin = new JournalWindow();
+    journalWin->show();
+    this->close();
 }
 
 void MoodTracker::handleTasksClicked()
 {
-    emit goToTasksPage();
+    auto *taskWin = new taskListWindow();
+    taskWin->show();
+    this->close();
 }
 
 Recommendation MoodTracker::getMoodRecommendation(int mood) {
