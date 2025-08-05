@@ -1,0 +1,5 @@
+C:/LyfestylenoNinja/build/Desktop_Qt_6_5_9_MinGW_64_bit-Debug/CMakeFiles/Lyfestyle.dir
+C:/LyfestylenoNinja/build/Desktop_Qt_6_5_9_MinGW_64_bit-Debug/CMakeFiles/edit_cache.dir
+C:/LyfestylenoNinja/build/Desktop_Qt_6_5_9_MinGW_64_bit-Debug/CMakeFiles/rebuild_cache.dir
+C:/LyfestylenoNinja/build/Desktop_Qt_6_5_9_MinGW_64_bit-Debug/CMakeFiles/Lyfestyle_autogen_timestamp_deps.dir
+C:/LyfestylenoNinja/build/Desktop_Qt_6_5_9_MinGW_64_bit-Debug/CMakeFiles/Lyfestyle_autogen.dir
