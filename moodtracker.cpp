@@ -1,27 +1,33 @@
-#include "journalwindow.h"
-#include "tasklistwindow.h"
-#include <QApplication>
-
 #include "moodtracker.h"
 #include "ui_moodtracker.h"
-#include <QDebug>
-#include <QLabel>
-#include <QHBoxLayout>
-#include <QMessageBox>
+#include "journalwindow.h"
+#include "tasklistwindow.h"
+#include "DatabaseManager.h"
 
-MoodTracker::MoodTracker(QWidget *parent)
-    : QWidget(parent)
+#include <QApplication>
+#include <QDebug>
+#include <QMessageBox>
+#include <QSqlQuery>
+#include <QSqlError>
+
+struct Recommendation {
+    QString shortTask;
+    QString longTask;
+};
+
+MoodTracker::MoodTracker(const QString &username, QWidget *parent)
+    : QMainWindow(parent)
     , ui(new Ui::MoodTracker)
+    , m_username(username)
 {
     ui->setupUi(this);
     this->resize(810, 660);
+    this->setWindowTitle("Mood Window");
 
-    // Set slider ranges from 1 to 6
     ui->MoodSlider->setRange(1, 6);
     ui->EnergySlider->setRange(1, 6);
     ui->AnxietySlider->setRange(1, 6);
 
-    // Enable rich text and clickable links in recommendation labels
     ui->MoodRecommendationLabel->setTextFormat(Qt::RichText);
     ui->AnxietyRecommendationLabel->setTextFormat(Qt::RichText);
     ui->EnergyRecommendationLabel->setTextFormat(Qt::RichText);
@@ -34,6 +40,8 @@ MoodTracker::MoodTracker(QWidget *parent)
     connect(ui->LoginButton, &QPushButton::clicked, this, &MoodTracker::handleLoginClicked);
     connect(ui->JournalButton, &QPushButton::clicked, this, &MoodTracker::handleJournalClicked);
     connect(ui->TasksButton, &QPushButton::clicked, this, &MoodTracker::handleTasksClicked);
+
+    loadPreviousMood();
 }
 
 MoodTracker::~MoodTracker()
@@ -47,29 +55,80 @@ void MoodTracker::handleSubmit()
     int energy = ui->EnergySlider->value();
     int anxiety = ui->AnxietySlider->value();
 
-    qDebug() << "Mood:" << mood << "Energy:" << energy << "Anxiety:" << anxiety;
-
     previousMood = mood;
     previousEnergy = energy;
     previousAnxiety = anxiety;
-
-    ui->PreviousMoodLabel->setText("Previous mood: " + QString::number(previousMood));
-    ui->PreviousEnergyLabel->setText("Previous energy: " + QString::number(previousEnergy));
-    ui->PreviousAnxietyLabel->setText("Previous anxiety: " + QString::number(previousAnxiety));
 
     Recommendation moodRec = getMoodRecommendation(mood);
     Recommendation anxietyRec = getAnxietyRecommendation(anxiety);
     Recommendation energyRec = getEnergyRecommendation(energy);
 
-    ui->MoodRecommendationLabel->setText(
-        "Short task: " + moodRec.shortTask + "<br>Long task: " + moodRec.longTask);
-    ui->AnxietyRecommendationLabel->setText(
-        "Short task: " + anxietyRec.shortTask + "<br>Long task: " + anxietyRec.longTask);
-    ui->EnergyRecommendationLabel->setText(
-        "Short task: " + energyRec.shortTask + "<br>Long task: " + energyRec.longTask);
+    ui->MoodRecommendationLabel->setText("Short task: " + moodRec.shortTask + "<br>Long task: " + moodRec.longTask);
+    ui->AnxietyRecommendationLabel->setText("Short task: " + anxietyRec.shortTask + "<br>Long task: " + anxietyRec.longTask);
+    ui->EnergyRecommendationLabel->setText("Short task: " + energyRec.shortTask + "<br>Long task: " + energyRec.longTask);
+
+    saveMoodToDatabase();
+
+    QSqlQuery recQuery(DatabaseManager::getDatabase());
+    recQuery.prepare(R"(
+        INSERT INTO recommendations (
+            username,
+            mood_short, mood_long,
+            energy_short, energy_long,
+            anxiety_short, anxiety_long
+        ) VALUES (?, ?, ?, ?, ?, ?, ?)
+    )");
+    recQuery.addBindValue(m_username);
+    recQuery.addBindValue(moodRec.shortTask);
+    recQuery.addBindValue(moodRec.longTask);
+    recQuery.addBindValue(energyRec.shortTask);
+    recQuery.addBindValue(energyRec.longTask);
+    recQuery.addBindValue(anxietyRec.shortTask);
+    recQuery.addBindValue(anxietyRec.longTask);
+
+    if (!recQuery.exec()) {
+        qDebug() << "Failed to insert recommendations:" << recQuery.lastError().text();
+    }
+
+    QSqlQuery resetQuery(DatabaseManager::getDatabase());
+    resetQuery.prepare("DELETE FROM recommendations_cleared WHERE username = ?");
+    resetQuery.addBindValue(m_username);
+    resetQuery.exec();
+
+    loadPreviousMood();
 }
 
-// NAVIGATION
+void MoodTracker::loadPreviousMood()
+{
+    QSqlQuery query(DatabaseManager::getDatabase());
+    query.prepare("SELECT mood, energy, anxiety FROM moods WHERE username = ? ORDER BY timestamp DESC LIMIT 1");
+    query.addBindValue(m_username);
+
+    if (query.exec() && query.next()) {
+        previousMood = query.value(0).toInt();
+        previousEnergy = query.value(1).toInt();
+        previousAnxiety = query.value(2).toInt();
+
+        ui->PreviousMoodLabel->setText("Previous mood: " + QString::number(previousMood));
+        ui->PreviousEnergyLabel->setText("Previous energy: " + QString::number(previousEnergy));
+        ui->PreviousAnxietyLabel->setText("Previous anxiety: " + QString::number(previousAnxiety));
+    }
+}
+
+void MoodTracker::saveMoodToDatabase()
+{
+    QSqlQuery query(DatabaseManager::getDatabase());
+    query.prepare("INSERT INTO moods (username, mood, energy, anxiety, timestamp) VALUES (?, ?, ?, ?, datetime('now'))");
+    query.addBindValue(m_username);
+    query.addBindValue(previousMood);
+    query.addBindValue(previousEnergy);
+    query.addBindValue(previousAnxiety);
+
+    if (!query.exec()) {
+        QMessageBox::critical(this, "Database Error", query.lastError().text());
+    }
+}
+
 void MoodTracker::handleLoginClicked()
 {
     QApplication::quit();
@@ -77,14 +136,14 @@ void MoodTracker::handleLoginClicked()
 
 void MoodTracker::handleJournalClicked()
 {
-    auto *journalWin = new JournalWindow();
+    auto *journalWin = new JournalWindow(m_username);
     journalWin->show();
     this->close();
 }
 
 void MoodTracker::handleTasksClicked()
 {
-    auto *taskWin = new taskListWindow();
+    auto *taskWin = new taskListWindow(m_username);
     taskWin->show();
     this->close();
 }
@@ -111,7 +170,10 @@ Recommendation MoodTracker::getAnxietyRecommendation(int anxiety) {
             "Draw, do crafts, or practice an instrument",
             "Do yoga or meditation<br><a href='https://www.youtube.com/watch?v=4pLUleLdwY4'>Watch: Deep Stretch Yoga</a>"
         };
-    case 3:
+    case 3: return {
+            "Listen to calming music or nature sounds",
+            "Write in a journal or do a brain dump for 20 minutes"
+        };
     case 4: return {"Make a to-do list", "Clean a room or reorganize a space"};
     case 5: return {"Take a warm shower", "Have a long talk with someone trusted"};
     case 6: return {"Hold ice cube in hand for focus", "See therapist or journal deeply for 45+ minutes"};

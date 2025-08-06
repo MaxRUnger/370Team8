@@ -2,10 +2,13 @@
 #define JOURNALWINDOW_H
 
 #include <QMainWindow>
-#include <QSqlDatabase>
+#include <QString>
+#include <QListWidgetItem>
 
 QT_BEGIN_NAMESPACE
-namespace Ui { class JournalWindow; }
+namespace Ui {
+class JournalWindow;
+}
 QT_END_NAMESPACE
 
 class JournalWindow : public QMainWindow
@@ -13,25 +16,21 @@ class JournalWindow : public QMainWindow
     Q_OBJECT
 
 public:
-    explicit JournalWindow(QWidget *parent = nullptr);
+    explicit JournalWindow(const QString &username, QWidget *parent = nullptr);
     ~JournalWindow();
 
 private slots:
-    void onAddEntryClicked();
+    void onSaveEntryClicked();
     void onDeleteEntryClicked();
-    void onEntrySelected();
-    void onDatetimeClicked();
-
-    // Navigation buttons
-    void onTaskListButtonClicked();
-    void onMoodPageButtonClicked();
-    void onLogoutButtonClicked();
+    void onEntrySelected(QListWidgetItem *item);
+    void onLogoutClicked();
+    void onMoodPageClicked();
+    void onTaskListPageClicked();
 
 private:
     Ui::JournalWindow *ui;
-    QSqlDatabase db;
+    QString m_username;
 
-    void connectDatabase();
     void loadEntries();
 };
 

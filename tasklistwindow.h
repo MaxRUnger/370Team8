@@ -2,41 +2,35 @@
 #define TASKLISTWINDOW_H
 
 #include <QMainWindow>
-#include <QListWidgetItem>
-#include <QSqlDatabase>
-#include <QSqlQuery>
-#include <QSqlError>
-#include <QDebug>
+#include <QString>
 
-QT_BEGIN_NAMESPACE
-namespace Ui { class taskListWindow; }
-QT_END_NAMESPACE
+namespace Ui {
+class taskListWindow;
+}
 
 class taskListWindow : public QMainWindow
 {
     Q_OBJECT
 
 public:
-    explicit taskListWindow(QWidget *parent = nullptr);
+    explicit taskListWindow(const QString& username, QWidget *parent = nullptr);
     ~taskListWindow();
 
 private slots:
-    void addTask();
-    void sortTaskList();
-    void completeSelectedTask();
-
-    // 🔗 New slots for navigation
     void onJournalPageClicked();
     void onMoodPageClicked();
     void onLogoutClicked();
+    void on_clearRecButtonClicked();
+    void on_addTaskButton_clicked();
+    void on_completeTaskButton_clicked();
 
 private:
     Ui::taskListWindow *ui;
+    QString m_username;
+    bool recommendationsCleared = false;
 
-    void initializeDatabase();
     void loadTasksFromDatabase();
-    void saveTaskToDatabase(const QString& text, const QTime& time, bool completed);
-    void markTaskAsCompletedInDatabase(const QString& text, const QTime& time);
+    void loadMoodRecommendations();
 };
 
 #endif // TASKLISTWINDOW_H
