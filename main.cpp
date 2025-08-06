@@ -1,6 +1,7 @@
 #include <QApplication>
 #include "LoginPage.h"
 #include "moodtracker.h"
+#include "databasemanager.h"
 
 int main(int argc, char *argv[])
 {
@@ -10,9 +11,10 @@ int main(int argc, char *argv[])
     LoginPage *login = new LoginPage();
     login->show();
 
+     DatabaseManager::initialize();
+
     QObject::connect(login, &LoginPage::loginSuccessful, [login](const QString &username) {
-        // Open MoodTracker window on successful login
-        MoodTracker *tracker = new MoodTracker();
+        MoodTracker *tracker = new MoodTracker(username);
         tracker->show();
         login->close();
         login->deleteLater();

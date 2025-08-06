@@ -1,7 +1,7 @@
 #ifndef MOODTRACKER_H
 #define MOODTRACKER_H
 
-#include <QWidget>
+#include <QMainWindow>
 #include <QString>
 
 QT_BEGIN_NAMESPACE
@@ -10,17 +10,12 @@ class MoodTracker;
 }
 QT_END_NAMESPACE
 
-struct Recommendation {
-    QString shortTask;
-    QString longTask;
-};
-
-class MoodTracker : public QWidget
+class MoodTracker : public QMainWindow
 {
     Q_OBJECT
 
 public:
-    explicit MoodTracker(QWidget *parent = nullptr);
+    explicit MoodTracker(const QString &username, QWidget *parent = nullptr);
     ~MoodTracker();
 
 private slots:
@@ -31,14 +26,18 @@ private slots:
 
 private:
     Ui::MoodTracker *ui;
+    QString m_username;
 
     int previousMood = 0;
     int previousEnergy = 0;
     int previousAnxiety = 0;
 
-    Recommendation getMoodRecommendation(int mood);
-    Recommendation getAnxietyRecommendation(int anxiety);
-    Recommendation getEnergyRecommendation(int energy);
+    void loadPreviousMood();
+    void saveMoodToDatabase();
+
+    struct Recommendation getMoodRecommendation(int mood);
+    struct Recommendation getAnxietyRecommendation(int anxiety);
+    struct Recommendation getEnergyRecommendation(int energy);
 };
 
 #endif // MOODTRACKER_H

@@ -1,30 +1,34 @@
 #include "tasklistwindow.h"
-#include "./ui_tasklistwindow.h"
+#include "ui_tasklistwindow.h"
 #include "journalwindow.h"
 #include "moodtracker.h"
-#include <QTime>
-#include <QListWidgetItem>
-#include <QMessageBox>
+#include "DatabaseManager.h"
 
-taskListWindow::taskListWindow(QWidget *parent)
-    : QMainWindow(parent)
-    , ui(new Ui::taskListWindow)
+#include <QListWidgetItem>
+#include <QDateTime>
+#include <QSqlQuery>
+#include <QSqlError>
+#include <QDebug>
+#include <QRegularExpression>
+
+taskListWindow::taskListWindow(const QString& username, QWidget *parent)
+    : QMainWindow(parent),
+    ui(new Ui::taskListWindow),
+    m_username(username)
 {
     ui->setupUi(this);
     this->resize(810, 660);
+    this->setWindowTitle("Tasklist Window");
 
-    connect(ui->addTaskButton, &QPushButton::clicked, this, &taskListWindow::addTask);
-    connect(ui->completeTaskButton, &QPushButton::clicked, this, &taskListWindow::completeSelectedTask);
+    loadTasksFromDatabase();
+    loadMoodRecommendations();
 
-    // Navigation button connections
+    connect(ui->clearRecButton, &QPushButton::clicked, this, &taskListWindow::on_clearRecButtonClicked);
+    connect(ui->logoutButton, &QPushButton::clicked, this, &taskListWindow::onLogoutClicked);
     connect(ui->journalPageButton, &QPushButton::clicked, this, &taskListWindow::onJournalPageClicked);
     connect(ui->moodPageButton, &QPushButton::clicked, this, &taskListWindow::onMoodPageClicked);
-    connect(ui->logoutButton, &QPushButton::clicked, this, &taskListWindow::onLogoutClicked);
-
-    ui->taskTimeEdit->setTime(QTime::currentTime());
-
-    initializeDatabase();
-    loadTasksFromDatabase();
+    connect(ui->addTaskButton, &QPushButton::clicked, this, &taskListWindow::on_addTaskButton_clicked);
+    connect(ui->completeTaskButton, &QPushButton::clicked, this, &taskListWindow::on_completeTaskButton_clicked);
 }
 
 taskListWindow::~taskListWindow()
@@ -32,168 +36,157 @@ taskListWindow::~taskListWindow()
     delete ui;
 }
 
-void taskListWindow::initializeDatabase() {
-    QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE");
-    db.setDatabaseName("tasks.db");
+void taskListWindow::loadTasksFromDatabase()
+{
+    ui->taskListWidget->clear();
 
-    if (!db.open()) {
-        qWarning() << "Database error:" << db.lastError().text();
+    QSqlQuery query(DatabaseManager::getDatabase());
+    query.prepare("SELECT task_text, timestamp FROM tasks WHERE username = ? ORDER BY strftime('%H:%M', timestamp)");
+    query.addBindValue(m_username);
+
+    if (query.exec()) {
+        while (query.next()) {
+            QString taskText = query.value(0).toString();
+            QString timestamp = query.value(1).toString();
+            QString displayText = QString("[%1] %2").arg(timestamp, taskText);
+            ui->taskListWidget->addItem(displayText);
+        }
+    } else {
+        qDebug() << "Failed to load tasks:" << query.lastError().text();
+    }
+}
+
+void taskListWindow::on_addTaskButton_clicked()
+{
+    QString taskText = ui->taskInput->text().trimmed();
+    QString timeText = ui->taskTimeEdit->time().toString("hh:mm AP");
+
+    if (taskText.isEmpty()) return;
+
+    QSqlQuery query(DatabaseManager::getDatabase());
+    query.prepare("INSERT INTO tasks (username, task_text, timestamp) VALUES (?, ?, ?)");
+    query.addBindValue(m_username);
+    query.addBindValue(taskText);
+    query.addBindValue(timeText);
+
+    if (!query.exec()) {
+        qDebug() << "Failed to insert task:" << query.lastError().text();
         return;
     }
 
-    QSqlQuery query;
-    query.exec("CREATE TABLE IF NOT EXISTS tasks ("
-               "id INTEGER PRIMARY KEY AUTOINCREMENT,"
-               "task_text TEXT,"
-               "task_time TEXT,"
-               "completed INTEGER)");
-}
-
-void taskListWindow::loadTasksFromDatabase() {
-    QSqlQuery query("SELECT task_text, task_time, completed FROM tasks");
-
-    while (query.next()) {
-        QString text = query.value(0).toString();
-        QTime time = QTime::fromString(query.value(1).toString(), "hh:mm AP");
-        bool completed = query.value(2).toInt();
-
-        QString displayText = QString("[%1] %2").arg(time.toString("hh:mm AP")).arg(text);
-        QListWidgetItem* item = new QListWidgetItem(displayText);
-        item->setData(Qt::UserRole, time);
-        item->setData(Qt::UserRole + 1, completed);
-
-        if (completed) {
-            QFont font = item->font();
-            font.setStrikeOut(true);
-            item->setFont(font);
-            item->setForeground(Qt::gray);
-        }
-
-        ui->taskListWidget->addItem(item);
-    }
-
-    sortTaskList();
-}
-
-void taskListWindow::saveTaskToDatabase(const QString& text, const QTime& time, bool completed) {
-    QSqlQuery query;
-    query.prepare("INSERT INTO tasks (task_text, task_time, completed) VALUES (?, ?, ?)");
-    query.addBindValue(text);
-    query.addBindValue(time.toString("hh:mm AP"));
-    query.addBindValue(completed ? 1 : 0);
-
-    if (!query.exec()) {
-        qWarning() << "Insert failed:" << query.lastError().text();
-    }
-}
-
-void taskListWindow::markTaskAsCompletedInDatabase(const QString& text, const QTime& time) {
-    QSqlQuery query;
-    query.prepare("DELETE FROM tasks WHERE task_text = ? AND task_time = ?");
-    query.addBindValue(text);
-    query.addBindValue(time.toString("hh:mm AP"));
-
-    if (!query.exec()) {
-        qWarning() << "Delete failed:" << query.lastError().text();
-    }
-}
-
-void taskListWindow::addTask()
-{
-    QString taskText = ui->taskInput->text().trimmed();
-    QTime taskTime = ui->taskTimeEdit->time();
-    if (taskText.isEmpty()) return;
-
-    QString displayText = QString("[%1] %2").arg(taskTime.toString("hh:mm AP")).arg(taskText);
-
-    QListWidgetItem* item = new QListWidgetItem(displayText);
-    item->setData(Qt::UserRole, taskTime);
-    item->setData(Qt::UserRole + 1, false);
-
-    ui->taskListWidget->addItem(item);
     ui->taskInput->clear();
-
-    sortTaskList();
-    saveTaskToDatabase(taskText, taskTime, false);
+    loadTasksFromDatabase();
 }
 
-void taskListWindow::sortTaskList()
+void taskListWindow::on_completeTaskButton_clicked()
 {
-    int count = ui->taskListWidget->count();
+    QListWidgetItem* selectedItem = ui->taskListWidget->currentItem();
+    if (!selectedItem) return;
 
-    struct TaskData {
-        QTime time;
-        QString text;
-        bool isCompleted;
-    };
+    QString taskDisplay = selectedItem->text();
 
-    QList<TaskData> taskList;
+    // Extract [timestamp] and task_text
+    QRegularExpression re(R"(\[(.*?)\] (.+))");
+    QRegularExpressionMatch match = re.match(taskDisplay);
 
-    for (int i = 0; i < count; ++i) {
-        QListWidgetItem* item = ui->taskListWidget->item(i);
-        TaskData task;
-        task.time = item->data(Qt::UserRole).toTime();
-        task.text = item->text();
-        task.isCompleted = item->data(Qt::UserRole + 1).toBool();
-        taskList.append(task);
+    if (!match.hasMatch()) return;
+
+    QString timestamp = match.captured(1);
+    QString taskText = match.captured(2);
+
+    // Delete from database
+    QSqlQuery query(DatabaseManager::getDatabase());
+    query.prepare("DELETE FROM tasks WHERE username = ? AND task_text = ? AND timestamp = ?");
+    query.addBindValue(m_username);
+    query.addBindValue(taskText);
+    query.addBindValue(timestamp);
+
+    if (!query.exec()) {
+        qDebug() << "Failed to delete task:" << query.lastError().text();
+        return;
     }
 
-    std::sort(taskList.begin(), taskList.end(), [](const TaskData& a, const TaskData& b) {
-        return a.time < b.time;
-    });
-
-    ui->taskListWidget->clear();
-    for (const TaskData& task : taskList) {
-        QListWidgetItem* item = new QListWidgetItem(task.text);
-        item->setData(Qt::UserRole, task.time);
-        item->setData(Qt::UserRole + 1, task.isCompleted);
-
-        if (task.isCompleted) {
-            QFont font = item->font();
-            font.setStrikeOut(true);
-            item->setFont(font);
-            item->setForeground(Qt::gray);
-        }
-
-        ui->taskListWidget->addItem(item);
-    }
-}
-
-void taskListWindow::completeSelectedTask()
-{
-    QListWidgetItem* item = ui->taskListWidget->currentItem();
-    if (!item) return;
-
-    item->setData(Qt::UserRole + 1, true);
-
-    QFont font = item->font();
+    // Visually mark as completed (strike-through and grey)
+    QFont font = selectedItem->font();
     font.setStrikeOut(true);
-    item->setFont(font);
-    item->setForeground(Qt::gray);
-
-    QString displayText = item->text();
-    QString taskText = displayText.section("] ", 1);
-    QTime taskTime = item->data(Qt::UserRole).toTime();
-
-    markTaskAsCompletedInDatabase(taskText, taskTime);
+    selectedItem->setFont(font);
+    selectedItem->setForeground(Qt::gray);
 }
 
-// Navigation Handlers
+
+void taskListWindow::loadMoodRecommendations()
+{
+    QSqlQuery checkQuery(DatabaseManager::getDatabase());
+    checkQuery.prepare("SELECT 1 FROM recommendations_cleared WHERE username = ?");
+    checkQuery.addBindValue(m_username);
+
+    if (checkQuery.exec() && checkQuery.next()) return;
+
+    QSqlQuery query(DatabaseManager::getDatabase());
+    query.prepare(R"(
+        SELECT mood_short, mood_long, energy_short, energy_long, anxiety_short, anxiety_long
+        FROM recommendations
+        WHERE username = ?
+        ORDER BY timestamp DESC
+        LIMIT 1
+    )");
+    query.addBindValue(m_username);
+
+    if (query.exec() && query.next()) {
+        QStringList recs = {
+            "Mood - Short: " + query.value(0).toString(),
+            "Mood - Long: " + query.value(1).toString(),
+            "Energy - Short: " + query.value(2).toString(),
+            "Energy - Long: " + query.value(3).toString(),
+            "Anxiety - Short: " + query.value(4).toString(),
+            "Anxiety - Long: " + query.value(5).toString()
+        };
+
+        auto cleanAndAdd = [&](const QString &text) {
+            QString cleaned = text;
+            cleaned.replace(QRegularExpression(R"(<[^>]*>)"), " ");
+            cleaned = cleaned.simplified();
+            if (!cleaned.trimmed().isEmpty()) {
+                ui->recommendListWidget->addItem(cleaned.trimmed());
+            }
+        };
+
+        ui->recommendListWidget->clear();
+        for (const QString& rec : recs) {
+            cleanAndAdd(rec);
+        }
+    } else {
+        qDebug() << "No recommendations found or query failed:" << query.lastError().text();
+    }
+}
+
+void taskListWindow::on_clearRecButtonClicked()
+{
+    QSqlQuery clearQuery(DatabaseManager::getDatabase());
+    clearQuery.prepare("INSERT OR IGNORE INTO recommendations_cleared (username) VALUES (?)");
+    clearQuery.addBindValue(m_username);
+    if (!clearQuery.exec()) {
+        qDebug() << "Failed to clear recommendations for user:" << clearQuery.lastError().text();
+    }
+
+    ui->recommendListWidget->clear();
+}
+
 void taskListWindow::onJournalPageClicked()
 {
-    this->hide();
-    JournalWindow *journalWin = new JournalWindow();
-    journalWin->show();
+    auto *journalWindow = new JournalWindow(m_username);
+    journalWindow->show();
+    this->close();
 }
 
 void taskListWindow::onMoodPageClicked()
 {
-    auto *moodWin = new MoodTracker();
-    moodWin->show();
+    auto *moodWindow = new MoodTracker(m_username);
+    moodWindow->show();
     this->close();
 }
 
 void taskListWindow::onLogoutClicked()
 {
-    QMessageBox::information(this, "Logout", "Logging out...");
+    qApp->quit();
 }
