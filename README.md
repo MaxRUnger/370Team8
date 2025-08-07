@@ -59,7 +59,6 @@ This project includes unit tests located in [`tests/tests.cpp`](https://github.c
 
 > If the option doesn’t appear:
 > - Ensure the file is part of the CMake project.
-> - Check that you’ve defined `QTEST_MAIN(AllTests)` in `tests.cpp`.
 
 ## Contributors
 
