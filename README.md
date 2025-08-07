@@ -46,6 +46,21 @@ LyfeStyle is a Qt-based desktop application for managing and tracking personal w
 ![moodtracker.png](images/mood-tracker.png)  
 ![tasklist.png](images/tasklist.png)
 
+## Running Unit Tests in Qt Creator
+
+This project includes unit tests located in [`tests/tests.cpp`](https://github.com/MaxRUnger/370Team8/blob/main/tests/tests.cpp). The tests use the `QTest` framework.
+
+### Steps to Run the Tests:
+
+1. Open `tests/tests.cpp` in Qt Creator.
+2. Right-click anywhere in the file editor.
+3. Select **"Run tests"** or **"Run 'tests' with the tools button"** from the context menu.
+4. The **test results** will appear in the **Test Results panel** (usually at the bottom of Qt Creator).
+
+> If the option doesn’t appear:
+> - Ensure the file is part of the CMake project.
+> - Check that you’ve defined `QTEST_MAIN(AllTests)` in `tests.cpp`.
+
 ## Contributors
 
 * Max Unger
