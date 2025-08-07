@@ -66,17 +66,26 @@ void AllTests::testMoodRecommendationLabelPresent() {
     QVERIFY(label != nullptr);
 }
 
-void AllTests::testJournalWindowNavigationButtons() {
+void AllTests::testJournalEntryBoxAccessible() {
     JournalWindow journal("testuser");
-    QVERIFY(journal.findChild<QPushButton*>("tasklistButton"));
-    QVERIFY(journal.findChild<QPushButton*>("logoutButton"));
-    QVERIFY(journal.findChild<QPushButton*>("moodPageButton"));
+    auto entryBox = journal.findChild<QTextEdit*>("journalTextEdit");
+    QVERIFY(entryBox != nullptr);
+    QVERIFY(entryBox->isEnabled());
 }
 
-void AllTests::testClearRecommendationsButton() {
+void AllTests::testClearRecommendationsFunctionality() {
     taskListWindow task("testuser");
     auto clearBtn = task.findChild<QPushButton*>("clearRecButton");
+    auto listWidget = task.findChild<QListWidget*>("recommendListWidget");
+
     QVERIFY(clearBtn != nullptr);
+    QVERIFY(listWidget != nullptr);
+
+    listWidget->addItem("Temporary Recommendation");
+    QVERIFY(listWidget->count() > 0);
+
+    QMetaObject::invokeMethod(clearBtn, "click");
+    QVERIFY(listWidget->count() == 0);
 }
 
 void AllTests::testLoginButtonFunctionality() {
