@@ -65,7 +65,7 @@ add_executable(tests
     DatabaseManager.cpp
     tests.h
 )
-
+set_target_properties(Lyfestyle PROPERTIES WIN32_EXECUTABLE TRUE)
 
 target_link_libraries(tests PRIVATE
     Qt${QT_VERSION_MAJOR}::Core
