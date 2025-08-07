@@ -71,6 +71,10 @@
        <bold>true</bold>
       </font>
      </property>
+     <property name="styleSheet">
+      <string notr="true">color: green;
+</string>
+     </property>
      <property name="text">
       <string>Input Task</string>
      </property>
@@ -138,6 +142,10 @@
        <pointsize>10</pointsize>
        <bold>true</bold>
       </font>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">color: red;
+</string>
      </property>
      <property name="text">
       <string>Complete Task</string>
@@ -220,6 +228,10 @@
        <pointsize>10</pointsize>
        <bold>true</bold>
       </font>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">color: red;
+</string>
      </property>
      <property name="text">
       <string>Logout</string>

@@ -98,6 +98,10 @@
            <bold>true</bold>
           </font>
          </property>
+         <property name="styleSheet">
+          <string notr="true">color: green;
+</string>
+         </property>
          <property name="text">
           <string>Add Entry</string>
          </property>
@@ -116,6 +120,10 @@
            <pointsize>10</pointsize>
            <bold>true</bold>
           </font>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">color: red;
+</string>
          </property>
          <property name="text">
           <string>Delete Entry</string>
@@ -198,6 +206,10 @@
            <pointsize>10</pointsize>
            <bold>true</bold>
           </font>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">color: red;
+</string>
          </property>
          <property name="text">
           <string>Logout</string>

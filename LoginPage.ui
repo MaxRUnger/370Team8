@@ -61,6 +61,10 @@
     </item>
     <item>
      <widget class="QPushButton" name="loginButton">
+      <property name="styleSheet">
+       <string notr="true">color: green;
+</string>
+      </property>
       <property name="text">
        <string>Login</string>
       </property>
