@@ -41,14 +41,16 @@ void taskListWindow::loadTasksFromDatabase()
     ui->taskListWidget->clear();
 
     QSqlQuery query(DatabaseManager::getDatabase());
-    query.prepare("SELECT task_text, timestamp FROM tasks WHERE username = ? ORDER BY strftime('%H:%M', timestamp)");
+    query.prepare("SELECT task_text, timestamp FROM tasks WHERE username = ? ORDER BY timestamp ASC");
     query.addBindValue(m_username);
 
     if (query.exec()) {
         while (query.next()) {
             QString taskText = query.value(0).toString();
             QString timestamp = query.value(1).toString();
-            QString displayText = QString("[%1] %2").arg(timestamp, taskText);
+            QTime time = QTime::fromString(timestamp, "HH:mm");
+            QString displayTime = time.toString("hh:mm AP");
+            QString displayText = QString("[%1] %2").arg(displayTime, taskText);
             ui->taskListWidget->addItem(displayText);
         }
     } else {
@@ -59,7 +61,7 @@ void taskListWindow::loadTasksFromDatabase()
 void taskListWindow::on_addTaskButton_clicked()
 {
     QString taskText = ui->taskInput->text().trimmed();
-    QString timeText = ui->taskTimeEdit->time().toString("hh:mm AP");
+    QString timeText = ui->taskTimeEdit->time().toString("HH:mm");  // Store in sortable 24-hour format
 
     if (taskText.isEmpty()) return;
 
@@ -85,34 +87,33 @@ void taskListWindow::on_completeTaskButton_clicked()
 
     QString taskDisplay = selectedItem->text();
 
-    // Extract [timestamp] and task_text
     QRegularExpression re(R"(\[(.*?)\] (.+))");
     QRegularExpressionMatch match = re.match(taskDisplay);
 
     if (!match.hasMatch()) return;
 
-    QString timestamp = match.captured(1);
+    QString displayTime = match.captured(1);
     QString taskText = match.captured(2);
 
-    // Delete from database
+    QTime time = QTime::fromString(displayTime, "hh:mm AP");
+    QString dbTime = time.toString("HH:mm");
+
     QSqlQuery query(DatabaseManager::getDatabase());
     query.prepare("DELETE FROM tasks WHERE username = ? AND task_text = ? AND timestamp = ?");
     query.addBindValue(m_username);
     query.addBindValue(taskText);
-    query.addBindValue(timestamp);
+    query.addBindValue(dbTime);
 
     if (!query.exec()) {
         qDebug() << "Failed to delete task:" << query.lastError().text();
         return;
     }
 
-    // Visually mark as completed (strike-through and grey)
     QFont font = selectedItem->font();
     font.setStrikeOut(true);
     selectedItem->setFont(font);
     selectedItem->setForeground(Qt::gray);
 }
-
 
 void taskListWindow::loadMoodRecommendations()
 {

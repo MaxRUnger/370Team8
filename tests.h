@@ -14,8 +14,8 @@ private slots:
     void testMoodSlidersInitialized();
     void testTaskListDisplaysNoCrash();
     void testMoodRecommendationLabelPresent();
-    void testJournalWindowNavigationButtons();
-    void testClearRecommendationsButton();
+    void testJournalEntryBoxAccessible();
+    void testClearRecommendationsFunctionality();
     void testLoginButtonFunctionality();
 };
 

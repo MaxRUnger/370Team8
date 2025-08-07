@@ -1,5 +1,3 @@
-#include "tests.h"
-
 #include <QTest>
 #include <QPushButton>
 #include <QSlider>
@@ -8,11 +6,13 @@
 #include <QDebug>
 #include <QListWidget>
 #include <QLabel>
+#include <QTextEdit>
 
 #include "DatabaseManager.h"
 #include "moodtracker.h"
 #include "tasklistwindow.h"
 #include "journalwindow.h"
+#include "tests.h"
 
 void AllTests::testDatabaseConnection() {
     QSqlDatabase db = DatabaseManager::getDatabase();

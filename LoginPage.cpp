@@ -42,8 +42,8 @@ void LoginPage::on_signupButton_clicked()
 
     UserManager userManager;
     if (userManager.addUser(username, password)) {
-        ui->statusLabel->setText("Signup successful. You can now log in.");
+        ui->statusLabel->setText("Signup successful.");
     } else {
-        ui->statusLabel->setText("Username already exists.");
+        ui->statusLabel->setText("User already exists.");
     }
 }
